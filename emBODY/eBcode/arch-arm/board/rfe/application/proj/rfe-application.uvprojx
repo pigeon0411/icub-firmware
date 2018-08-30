@@ -889,14 +889,14 @@
               <FilePath>..\..\..\..\..\..\eBcode\arch-arm\embot\app\embot_app_canprotocol_motor_periodic.cpp</FilePath>
             </File>
             <File>
-              <FileName>embot_app_canprotocol_bootloader.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\..\..\..\..\..\eBcode\arch-arm\embot\app\embot_app_canprotocol_bootloader.cpp</FilePath>
-            </File>
-            <File>
               <FileName>embot_app_canprotocol_analog_polling.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\..\..\..\..\..\eBcode\arch-arm\embot\app\embot_app_canprotocol_analog_polling.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>embot_app_canprotocol_bootloader.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\..\..\..\..\..\eBcode\arch-arm\embot\app\embot_app_canprotocol_bootloader.cpp</FilePath>
             </File>
             <File>
               <FileName>embot_app_canprotocol_analog_periodic.cpp</FileName>
@@ -1952,14 +1952,14 @@
               <FilePath>..\..\..\..\..\..\eBcode\arch-arm\embot\app\embot_app_canprotocol_motor_periodic.cpp</FilePath>
             </File>
             <File>
-              <FileName>embot_app_canprotocol_bootloader.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\..\..\..\..\..\eBcode\arch-arm\embot\app\embot_app_canprotocol_bootloader.cpp</FilePath>
-            </File>
-            <File>
               <FileName>embot_app_canprotocol_analog_polling.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\..\..\..\..\..\eBcode\arch-arm\embot\app\embot_app_canprotocol_analog_polling.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>embot_app_canprotocol_bootloader.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\..\..\..\..\..\eBcode\arch-arm\embot\app\embot_app_canprotocol_bootloader.cpp</FilePath>
             </File>
             <File>
               <FileName>embot_app_canprotocol_analog_periodic.cpp</FileName>

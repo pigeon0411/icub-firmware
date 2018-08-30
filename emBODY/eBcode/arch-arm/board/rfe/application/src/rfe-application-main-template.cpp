@@ -60,6 +60,8 @@ static const std::uint32_t address = embot::hw::sys::addressOfBootloader;
 static const std::uint32_t address = embot::hw::sys::addressOfApplication;
 #endif
 
+void usb_parser(void);
+
 int main(void)
 { 
     embot::app::theApplication::Config config(embot::common::time1millisec, stacksizes, operations, address);
@@ -94,6 +96,7 @@ static void eventbasedtask_onevent(embot::sys::Task *t, embot::common::EventMask
 static void eventbasedtask_init(embot::sys::Task *t, void *p);
 
 static const embot::common::Event evRXcanframe = 0x00000001 << 0;
+static const embot::common::Event evRXusb = 0x00000001 << 1;
 //static const embot::common::Event evSTRAINtick = 0x00000001 << 1;
 ///static const embot::common::Event evSTRAINdataready = 0x00000001 << 2;
 //static const embot::common::Event evIMUtick = 0x00000001 << 3;
@@ -152,6 +155,9 @@ static void start_evt_based(void)
     r = embot::hw::can::init(embot::hw::can::Port::one, canconfig);
     r = embot::hw::can::setfilters(embot::hw::can::Port::one, embot::app::theCANboardInfo::getInstance().getCANaddress());
     r = r;
+		
+		#warning add in here init of usb
+		// ricorda di mettere: mx etc init, init del driver di st, etc. usa pure variabili globli o definite in questo scope
      
 }
 
@@ -215,7 +221,13 @@ static void eventbasedtask_onevent(embot::sys::Task *t, embot::common::EventMask
             }
         }        
     }
-        
+
+    if(true == embot::binary::mask::check(eventmask, evRXusb))
+    {        
+				#warning metter qui una funzione c (od oggetto c++) che prenda la copia del buffer e faccia cose
+			usb_parser();
+			// ovver piloti i led.
+    } 		
     
 //    if(true == embot::binary::mask::check(eventmask, evIMUtick))
 //    {        
@@ -260,6 +272,12 @@ static void userdefonidle(void* param)
     static std::uint32_t cnt = 0;
     
     cnt++;
+}
+
+
+void usb_parser(void)
+{
+	
 }
 
 
