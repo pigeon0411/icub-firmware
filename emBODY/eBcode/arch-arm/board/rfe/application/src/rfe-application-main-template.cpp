@@ -1,5 +1,5 @@
 
-
+#include "usbif.h"
 
 #include "embot_app_canprotocol.h"
 #include "embot_app_theCANboardInfo.h"
@@ -146,6 +146,7 @@ static void start_evt_based(void)
 //    embot::app::application::theTHERMO::Config configthermo(embot::hw::bsp::strain2::thermometerSGAUGES, embot::hw::bsp::strain2::thermometerSGAUGESconfig, evTHERMOtick, evTHERMOdataready, eventbasedtask);
 //    thethermo.initialise(configthermo);         
 
+//
     // finally start can. i keep it as last because i dont want that the isr-handler calls its onrxframe() 
     // before the eventbasedtask is created.
     embot::hw::result_t r = embot::hw::resNOK;
@@ -157,6 +158,8 @@ static void start_evt_based(void)
     r = r;
 		
 		#warning add in here init of usb
+		
+		usbif_init();
 		// ricorda di mettere: mx etc init, init del driver di st, etc. usa pure variabili globli o definite in questo scope
      
 }
@@ -225,7 +228,7 @@ static void eventbasedtask_onevent(embot::sys::Task *t, embot::common::EventMask
     if(true == embot::binary::mask::check(eventmask, evRXusb))
     {        
 				#warning metter qui una funzione c (od oggetto c++) che prenda la copia del buffer e faccia cose
-			usb_parser();
+			usbif_process();
 			// ovver piloti i led.
     } 		
     
@@ -275,10 +278,6 @@ static void userdefonidle(void* param)
 }
 
 
-void usb_parser(void)
-{
-	
-}
 
 
 
