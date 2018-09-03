@@ -25,6 +25,7 @@
 #include "stm32hal.h"
 #include "usb_device.h"
 
+extern PCD_HandleTypeDef hpcd_USB_FS;
 
 // --------------------------------------------------------------------------------------------------------------------
 // - declaration of extern public interface
@@ -70,8 +71,16 @@
 extern void usbif_init(void)
 {
 	// mx etc.
+    MX_TIM2_Init();
 	MX_USB_DEVICE_Init();
+    MX_TIM6_Init();
+    MX_TIM16_Init();
+    
+   
+    HAL_GPIO_WritePin(EN_5V_GPIO_Port, EN_5V_Pin, GPIO_PIN_SET);
 	
+  //HAL_TIM_Base_Start_IT(&htim6);
+  HAL_TIM_Base_Start_IT(&htim16);
 	
 }
 
@@ -92,7 +101,19 @@ extern void usbif_process(void)
 // - redefinition of functions required by stm32 and weakly defined
 // --------------------------------------------------------------------------------------------------------------------
 
+/**
+* @brief This function handles USB event interrupt through EXTI line 17.
+*/
+void USB_IRQHandler(void)
+{
+  /* USER CODE BEGIN USB_IRQn 0 */
 
+  /* USER CODE END USB_IRQn 0 */
+  HAL_PCD_IRQHandler(&hpcd_USB_FS);
+  /* USER CODE BEGIN USB_IRQn 1 */
+
+  /* USER CODE END USB_IRQn 1 */
+}
 
 
 // --------------------------------------------------------------------------------------------------------------------

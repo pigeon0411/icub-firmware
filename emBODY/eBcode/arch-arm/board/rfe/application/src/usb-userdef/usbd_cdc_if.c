@@ -97,7 +97,7 @@
 #define APP_TX_DATA_SIZE  2048
 //#define APP_RX_DATA_SIZE  4
 //#define APP_TX_DATA_SIZE  4
-uint8_t received_data[]; 
+uint8_t received_data[64]; 
 uint32_t received_data_size; 
 uint32_t receive_total = 0;
 

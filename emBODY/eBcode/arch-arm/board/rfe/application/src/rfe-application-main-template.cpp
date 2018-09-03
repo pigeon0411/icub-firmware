@@ -157,10 +157,9 @@ static void start_evt_based(void)
     r = embot::hw::can::setfilters(embot::hw::can::Port::one, embot::app::theCANboardInfo::getInstance().getCANaddress());
     r = r;
 		
-		#warning add in here init of usb
-		
-		usbif_init();
-		// ricorda di mettere: mx etc init, init del driver di st, etc. usa pure variabili globli o definite in questo scope
+    // start agent of usb device 
+    usbif_init();
+    // ricorda di mettere: mx etc init, init del driver di st, etc. usa pure variabili globli o definite in questo scope
      
 }
 
