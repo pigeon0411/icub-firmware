@@ -1135,10 +1135,12 @@ Section Cross References
     main.o(i.main) refers to stm32l4xx_hal_tim.o(i.HAL_TIM_Base_Start_IT) for HAL_TIM_Base_Start_IT
     main.o(i.main) refers to stm32l4xx_hal_gpio.o(i.HAL_GPIO_TogglePin) for HAL_GPIO_TogglePin
     main.o(i.main) refers to stm32l4xx_hal.o(i.HAL_Delay) for HAL_Delay
+    main.o(i.main) refers to usb_parser.o(i.usbParser) for usbParser
     main.o(i.main) refers to strlen.o(.text) for strlen
     main.o(i.main) refers to usbd_cdc_if.o(i.CDC_Transmit_FS) for CDC_Transmit_FS
     main.o(i.main) refers to main.o(.data) for .data
     main.o(i.main) refers to tim.o(.bss) for htim16
+    main.o(i.main) refers to usbd_cdc_if.o(.bss) for UserRxBufferFS
     gpio.o(i.MX_GPIO_Init) refers to stm32l4xx_hal_gpio.o(i.HAL_GPIO_WritePin) for HAL_GPIO_WritePin
     gpio.o(i.MX_GPIO_Init) refers to stm32l4xx_hal_gpio.o(i.HAL_GPIO_Init) for HAL_GPIO_Init
     adc.o(i.HAL_ADC_MspDeInit) refers to stm32l4xx_hal_gpio.o(i.HAL_GPIO_DeInit) for HAL_GPIO_DeInit
@@ -2060,7 +2062,6 @@ Removing Unused input sections from the image.
     Removing usb_parser.o(.rev16_text), (4 bytes).
     Removing usb_parser.o(.revsh_text), (4 bytes).
     Removing usb_parser.o(.rrx_text), (6 bytes).
-    Removing usb_parser.o(i.usbParser), (190 bytes).
     Removing main.o(.rev16_text), (4 bytes).
     Removing main.o(.revsh_text), (4 bytes).
     Removing main.o(.rrx_text), (6 bytes).
@@ -2171,7 +2172,7 @@ Removing Unused input sections from the image.
     Removing usbd_cdc.o(.revsh_text), (4 bytes).
     Removing usbd_cdc.o(.rrx_text), (6 bytes).
 
-720 unused section(s) (total 71761 bytes) removed from the image.
+719 unused section(s) (total 71571 bytes) removed from the image.
 
 ==============================================================================
 
@@ -2227,21 +2228,21 @@ Image Symbol Table
     ../Src/usbd_conf.c                       0x00000000   Number         0  usbd_conf.o ABSOLUTE
     ../Src/usbd_desc.c                       0x00000000   Number         0  usbd_desc.o ABSOLUTE
     ../clib/../cmprslib/zerorunl2.c          0x00000000   Number         0  __dczerorl2.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry5.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry2.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry5.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8a.o ABSOLUTE
-    ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpyb.o ABSOLUTE
     ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpya.o ABSOLUTE
+    ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpyb.o ABSOLUTE
     ../clib/microlib/string/memset.c         0x00000000   Number         0  memseta.o ABSOLUTE
     ../clib/microlib/string/strlen.c         0x00000000   Number         0  strlen.o ABSOLUTE
     ..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_hal.c 0x00000000   Number         0  stm32l4xx_hal.o ABSOLUTE
@@ -2694,7 +2695,8 @@ Image Symbol Table
     i.__scatterload_zeroinit                 0x08008d92   Section       14  handlers.o(i.__scatterload_zeroinit)
     i.assert_failed                          0x08008da0   Section        0  main.o(i.assert_failed)
     i.main                                   0x08008da4   Section        0  main.o(i.main)
-    .constdata                               0x08008e6c   Section       64  system_stm32l4xx.o(.constdata)
+    i.usbParser                              0x08008e7c   Section        0  usb_parser.o(i.usbParser)
+    .constdata                               0x08008f3c   Section       64  system_stm32l4xx.o(.constdata)
     .data                                    0x20000000   Section       13  tlc59711_1.o(.data)
     .data                                    0x2000000d   Section        3  bno055_1.o(.data)
     .data                                    0x20000010   Section        6  bno055_1.o(.data)
@@ -3078,11 +3080,12 @@ Image Symbol Table
     __scatterload_null                       0x08008d91   Thumb Code     2  handlers.o(i.__scatterload_null)
     __scatterload_zeroinit                   0x08008d93   Thumb Code    14  handlers.o(i.__scatterload_zeroinit)
     assert_failed                            0x08008da1   Thumb Code     2  main.o(i.assert_failed)
-    main                                     0x08008da5   Thumb Code   178  main.o(i.main)
-    AHBPrescTable                            0x08008e6c   Data          16  system_stm32l4xx.o(.constdata)
-    MSIRangeTable                            0x08008e7c   Data          48  system_stm32l4xx.o(.constdata)
-    Region$$Table$$Base                      0x08008eac   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x08008ecc   Number         0  anon$$obj.o(Region$$Table)
+    main                                     0x08008da5   Thumb Code   190  main.o(i.main)
+    usbParser                                0x08008e7d   Thumb Code   190  usb_parser.o(i.usbParser)
+    AHBPrescTable                            0x08008f3c   Data          16  system_stm32l4xx.o(.constdata)
+    MSIRangeTable                            0x08008f4c   Data          48  system_stm32l4xx.o(.constdata)
+    Region$$Table$$Base                      0x08008f7c   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x08008f9c   Number         0  anon$$obj.o(Region$$Table)
     WRITE_CMD                                0x20000000   Data           1  tlc59711_1.o(.data)
     BLANK                                    0x20000001   Data           1  tlc59711_1.o(.data)
     DSPRPT                                   0x20000002   Data           1  tlc59711_1.o(.data)
@@ -3167,9 +3170,9 @@ Memory Map of the image
 
   Image Entry point : 0x08000195
 
-  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00009098, Max: 0x00080000, ABSOLUTE, COMPRESSED[0x00008fa0])
+  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00009168, Max: 0x00080000, ABSOLUTE, COMPRESSED[0x00009070])
 
-    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x00008ecc, Max: 0x00080000, ABSOLUTE)
+    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x00008f9c, Max: 0x00080000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -3531,12 +3534,14 @@ Memory Map of the image
     0x08008d92   0x08008d92   0x0000000e   Code   RO         6329    i.__scatterload_zeroinit  mc_w.l(handlers.o)
     0x08008da0   0x08008da0   0x00000002   Code   RO         4827    i.assert_failed     main.o
     0x08008da2   0x08008da2   0x00000002   PAD
-    0x08008da4   0x08008da4   0x000000c8   Code   RO         4828    i.main              main.o
-    0x08008e6c   0x08008e6c   0x00000040   Data   RO          420    .constdata          system_stm32l4xx.o
-    0x08008eac   0x08008eac   0x00000020   Data   RO         6325    Region$$Table       anon$$obj.o
+    0x08008da4   0x08008da4   0x000000d8   Code   RO         4828    i.main              main.o
+    0x08008e7c   0x08008e7c   0x000000be   Code   RO         4762    i.usbParser         usb_parser.o
+    0x08008f3a   0x08008f3a   0x00000002   PAD
+    0x08008f3c   0x08008f3c   0x00000040   Data   RO          420    .constdata          system_stm32l4xx.o
+    0x08008f7c   0x08008f7c   0x00000020   Data   RO         6325    Region$$Table       anon$$obj.o
 
 
-    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x08008ecc, Size: 0x000028f0, Max: 0x00028000, ABSOLUTE, COMPRESSED[0x000000d4])
+    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x08008f9c, Size: 0x000028f0, Max: 0x00028000, ABSOLUTE, COMPRESSED[0x000000d4])
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -3593,7 +3598,7 @@ Image component sizes
        188          4          0          0          0        926   dma.o
        268         20          0          0          0       1083   gpio.o
       1178        168          0          0        880       4556   i2c.o
-       796        132          0         24        420       9887   main.o
+       812        136          0         24        420       9899   main.o
        128          8          0          9          0       1985   mpu9250.o
        168          0          0          0          0       1517   rfe_expression.o
         96         34          0          0         16       1635   rng.o
@@ -3623,7 +3628,7 @@ Image component sizes
        472         92          0          0        192       4274   tim.o
        472         38          0         13         52     762896   tlc59711_1.o
         68         18          0          0        668        820   usb_device.o
-         0          0          0          0          0       6331   usb_parser.o
+       190          0          0          0          0       7623   usb_parser.o
        726         16          0        271          0      14166   usbd_cdc.o
        160         28          0         28       4096       3829   usbd_cdc_if.o
        804         58          0          0       1684      15697   usbd_conf.o
@@ -3633,9 +3638,9 @@ Image component sizes
        132          0          0          0          0       4768   usbd_ioreq.o
 
     ----------------------------------------------------------------------
-     35794       4282        500        460      10020    1105962   Object Totals
+     36002       4286        500        460      10020    1107266   Object Totals
          0          0         32          0          0          0   (incl. Generated)
-        50          0          0          9          4          0   (incl. Padding)
+        52          0          0          9          4          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
@@ -3676,15 +3681,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     36056       4298        500        460      10020    1076006   Grand Totals
-     36056       4298        500        212      10020    1076006   ELF Image Totals (compressed)
-     36056       4298        500        212          0          0   ROM Totals
+     36264       4302        500        460      10020    1077210   Grand Totals
+     36264       4302        500        212      10020    1077210   ELF Image Totals (compressed)
+     36264       4302        500        212          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                36556 (  35.70kB)
+    Total RO  Size (Code + RO Data)                36764 (  35.90kB)
     Total RW  Size (RW Data + ZI Data)             10480 (  10.23kB)
-    Total ROM Size (Code + RO Data + RW Data)      36768 (  35.91kB)
+    Total ROM Size (Code + RO Data + RW Data)      36976 (  36.11kB)
 
 ==============================================================================
 

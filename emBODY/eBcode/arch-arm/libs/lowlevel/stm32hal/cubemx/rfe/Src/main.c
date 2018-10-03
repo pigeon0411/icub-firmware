@@ -192,6 +192,9 @@ int main(void)
     HAL_GPIO_TogglePin(LED_BLUE_GPIO_Port, LED_BLUE_Pin);
     HAL_Delay(200);
     
+    UserRxBufferFS[0]='\0';      
+    usbParser(UserRxBufferFS);   //this function should return the face type ...
+      
     // USB Test
     uint8_t HiMsg[] = "Hello! ";
     CDC_Transmit_FS(HiMsg, strlen(HiMsg));
