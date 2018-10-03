@@ -67,3 +67,4 @@ rfe_master\main.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_iore
 rfe_master\main.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h
 rfe_master\main.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h
 rfe_master\main.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h
+rfe_master\main.o: ../Inc/usb_parser.h

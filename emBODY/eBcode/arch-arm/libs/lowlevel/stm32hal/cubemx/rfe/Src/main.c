@@ -66,6 +66,8 @@
 #include "BNO055.h"
 #include "MPU9250.h"
 #include "usbd_cdc_if.h"
+#include "usb_parser.h"
+
 
 /* USER CODE END Includes */
 
@@ -187,15 +189,15 @@ int main(void)
   
   while (1)
   {
-    //HAL_GPIO_TogglePin(LED_BLUE_GPIO_Port, LED_BLUE_Pin);
-    //HAL_Delay(200);
+    HAL_GPIO_TogglePin(LED_BLUE_GPIO_Port, LED_BLUE_Pin);
+    HAL_Delay(200);
     
     // USB Test
-    //uint8_t HiMsg[] = "Hello! ";
-    //CDC_Transmit_FS(HiMsg, strlen(HiMsg));
+    uint8_t HiMsg[] = "Hello! ";
+    CDC_Transmit_FS(HiMsg, strlen(HiMsg));
     //CDC_Transmit_FS(received_data, received_data_size);
     //CDC_Transmit_FS(receive_total, receive_total);
-    //HAL_Delay(500);
+    HAL_Delay(500);
       
 //    for(i=0; i<60;i++){
 //      FACE_MASK[i] = color;

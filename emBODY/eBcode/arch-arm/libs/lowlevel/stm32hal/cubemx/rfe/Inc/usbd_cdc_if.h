@@ -62,6 +62,10 @@
 extern uint8_t received_data[]; 
 extern uint32_t received_data_size; 
 extern uint32_t receive_total;
+
+#define APP_RX_DATA_SIZE  2048
+extern uint8_t UserRxBufferFS[APP_RX_DATA_SIZE];
+
 /* USER CODE END INCLUDE */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
