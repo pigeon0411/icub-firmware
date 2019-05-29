@@ -148,7 +148,7 @@ volatile long gQEPosition = 0;
 volatile int  gQEVelocity = 0;
 volatile tMeasCurrParm MeasCurrParm;
 volatile tCtrlReferences CtrlReferences;
-tParkParm ParkParm;
+volatile tParkParm ParkParm;
 
 /////////////////////////////////////////////////
 
@@ -194,9 +194,9 @@ static const int PWM_MAX = (8*LOOPINTCY)/20; // = 80%
 volatile int gMaxCurrent = 0;
 volatile long sI2Tlimit = 0;
 
-volatile int  IKp =  8;
-volatile int  IKi =  2;
-volatile char IKs = 10;
+volatile int  IKp = 0; //8;
+volatile int  IKi = 0; //2;
+volatile char IKs = 0; //10;
 volatile long IIntLimit = 0;//800L*1024L;
 
 volatile int  SKp = 0x0C;
@@ -532,6 +532,9 @@ int alignRotor(volatile int* IqRef)
 extern volatile int dataC;
 extern volatile int dataD;
 
+volatile int angle_feedback = 0;
+volatile short Ia = 0, Ib = 0, Ic = 0;
+    
 void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
 {
     int Vq = 0;
@@ -539,6 +542,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
     static const int cos_table[] = {32767,32763,32748,32723,32688,32643,32588,32523,32449,32364,32270,32165,32051,31928,31794,31651,31498,31336,31164,30982,30791,30591,30381,30163,29935,29697,29451,29196,28932,28659,28377};
     static const int sin_table[] = {    0,  330,  660,  990, 1319, 1648, 1977, 2305, 2632, 2959, 3285, 3609, 3933, 4255, 4576, 4896, 5214, 5531, 5846, 6159, 6470, 6779, 7087, 7392, 7694, 7995, 8293, 8588, 8881, 9171, 9459};
 
+    static int Ia_old = 0, Ib_old = 0, Ic_old = 0;
     static int *ppwmH = NULL, *ppwmL = NULL, *ppwm0 = NULL;
     static int Va = 0, Vb = 0, Vc = 0;
     
@@ -557,10 +561,14 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
     MeasAndCompIaIcCalculateIb();
 
     ParkParm.qIb = -ParkParm.qIa-ParkParm.qIc;
-
-    ParkParm.qIa /= 3;
-    ParkParm.qIb /= 3;
-    ParkParm.qIc /= 3;
+    
+    Ia = (ParkParm.qIa + Ia_old)/6;
+    Ib = (ParkParm.qIb + Ib_old)/6;
+    Ic = (ParkParm.qIc + Ic_old)/6;
+    
+    Ia_old = ParkParm.qIa;
+    Ib_old = ParkParm.qIb;
+    Ic_old = ParkParm.qIc;
 
     int enc = 0;
     static int enc_start_sec = 0;
@@ -575,7 +583,18 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
         }
         else
         {
-            enc = QEgetElettrDeg();
+            //enc = QEgetElettrDeg();
+            
+            static int t = 0;
+            static int senc = 0;
+            
+            enc = senc;
+            
+            if (++t > 555)
+            {
+                t = 0;
+                if (++senc > 359) senc = 0;
+            }
         }
     }
 
@@ -587,8 +606,14 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
 
     if (MotorConfig.has_hall)
     {
-        static const char dhes2sector[] = {0,6,2,1,4,5,3};
-        //static const char dhes2sector[] = {0,2,6,1,4,3,5}; // R1 upper arm
+#ifdef R1_UPPER_ARM
+        static const char dhes2sector[] = {0,2,6,1,4,3,5}; // R1 upper arm
+#elif defined(MECAPION)
+        static const char dhes2sector[] = {0,6,4,5,2,1,3}; // r1
+#else
+        static const char dhes2sector[] = {0,6,2,1,4,5,3}; // icub
+#endif
+
         sector = dhes2sector[DHESRead()];
     }
     else
@@ -670,39 +695,39 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
         sector_stored_old = sector_stored;
         sector_stored = sector;
         
-        #define HI(Ix,Vx) iH = &(ParkParm.Ix); ppwmH = &Vx;
-        #define LO(Ix,Vx) iL = &(ParkParm.Ix); ppwmL = &Vx;
-        #define NE(Ix,Vx) i0 = &(ParkParm.Ix); ppwm0 = &Vx;
+        #define HI(Ix,Vx) iH = &Ix; ppwmH = &Vx;
+        #define LO(Ix,Vx) iL = &Ix; ppwmL = &Vx;
+        #define NE(Ix,Vx) i0 = &Ix; ppwm0 = &Vx;
         
         switch (sector) // original
         {
-            case 1: HI(qIa,Va) LO(qIb,Vb) NE(qIc,Vc) break; // 1 0 1   5 -> 1
-            case 2: HI(qIa,Va) LO(qIc,Vc) NE(qIb,Vb) break; // 1 0 0   4 -> 2
-            case 3: HI(qIb,Vb) LO(qIc,Vc) NE(qIa,Va) break; // 1 1 0   6 -> 3
-            case 4: HI(qIb,Vb) LO(qIa,Va) NE(qIc,Vc) break; // 0 1 0   2 -> 4
-            case 5: HI(qIc,Vc) LO(qIa,Va) NE(qIb,Vb) break; // 0 1 1   3 -> 5
-            case 6: HI(qIc,Vc) LO(qIb,Vb) NE(qIa,Va) break; // 0 0 1   1 -> 6
+            case 1: HI(Ia,Va) LO(Ib,Vb) NE(Ic,Vc) break; // 1 0 1   5 -> 1
+            case 2: HI(Ia,Va) LO(Ic,Vc) NE(Ib,Vb) break; // 1 0 0   4 -> 2
+            case 3: HI(Ib,Vb) LO(Ic,Vc) NE(Ia,Va) break; // 1 1 0   6 -> 3
+            case 4: HI(Ib,Vb) LO(Ia,Va) NE(Ic,Vc) break; // 0 1 0   2 -> 4
+            case 5: HI(Ic,Vc) LO(Ia,Va) NE(Ib,Vb) break; // 0 1 1   3 -> 5
+            case 6: HI(Ic,Vc) LO(Ib,Vb) NE(Ia,Va) break; // 0 0 1   1 -> 6
         }
-         
+        
         /*
         switch (sector) // R1 right wheel
         {
-            case 1: HI(qIc,Vc) LO(qIa,Va) NE(qIb,Vb) break; // 0 1 1   3 -> 5
-            case 2: HI(qIc,Vc) LO(qIb,Vb) NE(qIa,Va) break; // 0 0 1   1 -> 6
-            case 3: HI(qIa,Va) LO(qIb,Vb) NE(qIc,Vc) break; // 1 0 1   5 -> 1
-            case 4: HI(qIa,Va) LO(qIc,Vc) NE(qIb,Vb) break; // 1 0 0   4 -> 2
-            case 5: HI(qIb,Vb) LO(qIc,Vc) NE(qIa,Va) break; // 1 1 0   6 -> 3
-            case 6: HI(qIb,Vb) LO(qIa,Va) NE(qIc,Vc) break; // 0 1 0   2 -> 4
+            case 1: HI(Ic,Vc) LO(Ia,Va) NE(Ib,Vb) break; // 0 1 1   3 -> 5
+            case 2: HI(Ic,Vc) LO(Ib,Vb) NE(Ia,Va) break; // 0 0 1   1 -> 6
+            case 3: HI(Ia,Va) LO(Ib,Vb) NE(Ic,Vc) break; // 1 0 1   5 -> 1
+            case 4: HI(Ia,Va) LO(Ic,Vc) NE(Ib,Vb) break; // 1 0 0   4 -> 2
+            case 5: HI(Ib,Vb) LO(Ic,Vc) NE(Ia,Va) break; // 1 1 0   6 -> 3
+            case 6: HI(Ib,Vb) LO(Ia,Va) NE(Ic,Vc) break; // 0 1 0   2 -> 4
         }
            
         switch (sector) // R1 left wheel
         {
-            case 1: HI(qIb,Vb) LO(qIc,Vc) NE(qIa,Va) break; // 1 1 0   6 -> 3
-            case 2: HI(qIb,Vb) LO(qIa,Va) NE(qIc,Vc) break; // 0 1 0   2 -> 4
-            case 3: HI(qIc,Vc) LO(qIa,Va) NE(qIb,Vb) break; // 0 1 1   3 -> 5
-            case 4: HI(qIc,Vc) LO(qIb,Vb) NE(qIa,Va) break; // 0 0 1   1 -> 6
-            case 5: HI(qIa,Va) LO(qIb,Vb) NE(qIc,Vc) break; // 1 0 1   5 -> 1
-            case 6: HI(qIa,Va) LO(qIc,Vc) NE(qIb,Vb) break; // 1 0 0   4 -> 2
+            case 1: HI(Ib,Vb) LO(Ic,Vc) NE(Ia,Va) break; // 1 1 0   6 -> 3
+            case 2: HI(Ib,Vb) LO(Ia,Va) NE(Ic,Vc) break; // 0 1 0   2 -> 4
+            case 3: HI(Ic,Vc) LO(Ia,Va) NE(Ib,Vb) break; // 0 1 1   3 -> 5
+            case 4: HI(Ic,Vc) LO(Ib,Vb) NE(Ia,Va) break; // 0 0 1   1 -> 6
+            case 5: HI(Ia,Va) LO(Ib,Vb) NE(Ic,Vc) break; // 1 0 1   5 -> 1
+            case 6: HI(Ia,Va) LO(Ic,Vc) NE(Ib,Vb) break; // 1 0 0   4 -> 2
         }
         */
     }
@@ -727,6 +752,8 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
         delta = (enc%60)-30;
     }
 
+    angle_feedback = ((sector-1)*60+delta+360)%360;
+    
     // back compatibility
     //delta = 0;
 
@@ -750,7 +777,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
     }
     else
     {
-        I2Tdata.IQMeasured = /* sqrt3/2 */  (int)(__builtin_mulss((*iH-*iL),cosT)>>15)+3*(int)(__builtin_mulss(  *i0    ,sinT)>>15);
+        I2Tdata.IQMeasured = /* sqrt3/2 */  (int)(__builtin_mulss((*iH-*iL),cosT)>>15)+3*(int)(__builtin_mulss(   *i0   ,sinT)>>15);
         I2Tdata.IDMeasured = /* 3/2 */      (int)(__builtin_mulss(   *i0   ,cosT)>>15)-  (int)(__builtin_mulss((*iH-*iL),sinT)>>15);
     }
 
@@ -790,10 +817,21 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
                 }
                 else
                 {
-                    VqRef += __builtin_mulss(speed_error-speed_error_old,SKp) + __builtin_mulss(speed_error + speed_error_old,SKi);
-
-                    if (VqRef > SIntLimit) VqRef = SIntLimit; else if (VqRef < -SIntLimit) VqRef = -SIntLimit;
-
+#ifdef R1_UPPER_ARM
+                    if (speed_error || CtrlReferences.WRef)
+                    {
+#endif
+                        VqRef += __builtin_mulss(speed_error-speed_error_old,SKp) + __builtin_mulss(speed_error + speed_error_old,SKi);
+                        
+                        if (VqRef > SIntLimit) VqRef = SIntLimit; else if (VqRef < -SIntLimit) VqRef = -SIntLimit;
+#ifdef R1_UPPER_ARM
+                    }
+                    else
+                    {
+                        VqRef = 0;
+                    }
+#endif
+                    
                     IqRef = 0;
                 }
 
@@ -849,6 +887,16 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
     }
     else // current open loop
     {
+#ifdef RELENTLESS
+        if ((I2Tdata.IQMeasured > Iovr) || (I2Tdata.IQMeasured < -Iovr))
+        {
+            SysError.OverCurrentFailure = 1;
+            // call fault handler
+            FaultConditionsHandler();
+
+            return;
+        }   
+#else
         if (I2Tdata.IQMeasured > Ipeak)
         {
             limit =  1;
@@ -880,6 +928,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
             Vq = (int)((VqRef+VqL)>>IKs);
         }
         else
+#endif // RELENTLESS
         {
             if (gControlMode == icubCanProto_controlmode_openloop)
             {
@@ -1071,7 +1120,9 @@ void EnableDrive()
     ADCInterruptAndDMAEnable();
 
     // enable the overcurrent interrupt
+#ifndef RELENTLESS
     OverCurrentFaultIntEnable();
+#endif
 
     // I2T will run on behalf of 2FOC loop. Stop running it in behalf of Timer 3
 

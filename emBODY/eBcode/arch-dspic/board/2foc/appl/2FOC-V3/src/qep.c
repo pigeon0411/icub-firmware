@@ -61,7 +61,8 @@ void QEinit(int resolution, int motor_num_poles,char use_index)
     // main CK = 40Mhz. Filter CK = 10 Mhz
     // Filter accept edge if it persist over 3 CK
     // cycles. So max QEP pin freq is about 3.3Mhz
-    DFLTCONbits.QECK = 2;
+    //DFLTCONbits.QECK = 2;
+    DFLTCONbits.QECK = 3;
 
     DFLTCONbits.IMV = 3;
 

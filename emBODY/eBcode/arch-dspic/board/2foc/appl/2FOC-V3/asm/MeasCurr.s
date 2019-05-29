@@ -80,8 +80,8 @@ MeasAndCompIaIcCalculateIb:
           mov ACCAU,w0				
           push.w w0
 
-          mov.w		_ADCBuffer+0,w0					; w0 = -qIa (with offset)
-	      sub.w     _MeasCurrParm+ADC_Offseta,WREG	; w0 = qIa
+          mov.w     _ADCBuffer+0,w0			; w0 = -qIa (with offset)
+	  sub.w     _MeasCurrParm+ADC_Offseta,WREG	; w0 = qIa
 
           mov.w     w0,w5                           ; w5 = qIa
           mov.w     _MeasCurrParm+ADC_qKa,w4        ; w4 = qKa
@@ -89,19 +89,19 @@ MeasAndCompIaIcCalculateIb:
           sac.r     A,#0,w4                         ; w4 = qKa*qIa
           mov.w     w4,_ParkParm+Park_qIa           ; ParkParm.qIa = qIa * qKa
         
-          mov.w		_ADCBuffer+2,w0					; w0 = -qIc (with offset)
+          mov.w     _ADCBuffer+2,w0			; w0 = -qIc (with offset)
     	  sub.w     _MeasCurrParm+ADC_Offsetbc,WREG	; w0 = qIc   
 		  
 ; This code is for diagnostic pourpose only, ic is not used in the algorithm
-		  mov.w     w0,w6                           ; w6 = qIc
-		  mov.w     _MeasCurrParm+ADC_qKc, w7       ; w7 = qKc
+          mov.w     w0,w6                           ; w6 = qIc
+          mov.w     _MeasCurrParm+ADC_qKc, w7       ; w7 = qKc
           mpy       w6*w7,A                         ; Accum = qIc * qKc
           sac.r     A,#0, w4                        ; w4 = qIc * qKc
           mov.w     w4,_ParkParm+Park_qIc           ; ParkParm.qIc = qIc * qKc
 ; end of Ic related calculations
 
 ;          add.w     w5,w0,w0;                       ; w0 = qIa + qIc
-;		  mov.w     w0,w5		                    ; w5 = qIa + qIc	
+;	   mov.w     w0,w5		             ; w5 = qIa + qIc	
 
 ;          mov.w     _MeasCurrParm+ADC_qKb,w4        ; w4 = qKb
 ;          mpy       w4*w5,A                         ; Accum = qIb * qKb
@@ -136,7 +136,7 @@ MeasAndCompIaIb:
           mov.w     _ADCBuffer+0,w0                 ; w0 = -qIa (with offset)
           sub.w     _MeasCurrParm+ADC_Offseta,WREG  ; w0 = qIa 
           mov.w     w0,w5                           ; w5 = qIa // magari si può evitare?
-          mov.w     _MeasCurrParm+ADC_qKa,w4        ; w4 = qKa   
+          mov.w     _MeasCurrParm+ADC_qKa,w4        ; w4 = qKa
           mpy       w4*w5,A                         ; Accum = qKa*qIa 
           sac.r     A,#0,w4                         ; w4 = qKa*qIa
           mov.w     w4,_ParkParm+Park_qIa           ; ParkParm.qIa = qKa*qIa

@@ -363,7 +363,7 @@ void ADCDoOffsetCalibration(void)
 
     while (1)
     {
-	ret = ADCCalibrate();
+        ret = ADCCalibrate();
 
         if (ret == -1)
         {
