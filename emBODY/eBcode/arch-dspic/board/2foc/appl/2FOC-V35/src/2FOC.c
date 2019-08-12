@@ -613,17 +613,24 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
     // scale currents by MeasCurrParm.qKa, qKb, qKc
     // Calculate ParkParm.qIa, qIb, qIc
     //MeasAndCompIaIcCalculateIb();
-
-    ParkParm.qIa = (int)((__builtin_mulss(MeasCurrParm.Offseta-ADCBuffer[0],MeasCurrParm.qKa)+8192L)>>14);
+    
+    ParkParm.qIa = (int)((__builtin_mulss(MeasCurrParm.Offseta-ADCBuffer[0],MeasCurrParm.qKa)+8192L)>>14); 
     ParkParm.qIc = (int)((__builtin_mulss(MeasCurrParm.Offsetc-ADCBuffer[1],MeasCurrParm.qKc)+8192L)>>14);
     
     ParkParm.qIb = -ParkParm.qIa-ParkParm.qIc;
+    
+    // qIx = 64 is equal to 50 mA current here
+    // since we have 10 bits resolution, left aligned, with LSB = 50 mA
+    
+    // gain = 64/49.03
     
     static short Ia_old = 0, Ib_old = 0, Ic_old = 0;
     
     Ia = (ParkParm.qIa + Ia_old)/3;
     Ib = (ParkParm.qIb + Ib_old)/3;
     Ic = (ParkParm.qIc + Ic_old)/3;
+    
+    // gain = (64/49.03) * (2/3)
     
     Ia_old = ParkParm.qIa;
     Ib_old = ParkParm.qIb;
@@ -747,16 +754,18 @@ void __attribute__((__interrupt__, no_auto_psv)) _DMA0Interrupt(void)
     
     if (negative_sec)
     {
-        I2Tdata.IQMeasured = /* sqrt3/2 */  (int)((__builtin_mulss(*iH-*iL,cosT)-__builtin_mulss( *i0*3 ,sinT)+32768L)>>16);
-        I2Tdata.IDMeasured = /* 3/2 */     -(int)((__builtin_mulss(  *i0  ,cosT)+__builtin_mulss(*iH-*iL,sinT)+32768L)>>16);
+        // gain = (64/49.03) * (2/3) * (2/sqrt3) = 1.0048 OK!
+        
+        I2Tdata.IQMeasured = /* sqrt3/2 */  (int)((__builtin_mulss(*iH-*iL,cosT)-__builtin_mulss( *i0*3 ,sinT)+16384L)>>15);
+        I2Tdata.IDMeasured = /* 3/2 */     -(int)((__builtin_mulss(  *i0  ,cosT)+__builtin_mulss(*iH-*iL,sinT)+16384L)>>15);
         
         //I2Tdata.IQMeasured = /* sqrt3/2 */  (int)(__builtin_mulss((*iH-*iL),cosT)>>15)-3*(int)(__builtin_mulss(   *i0   ,sinT)>>15);
         //I2Tdata.IDMeasured = /* 3/2 */     -(int)(__builtin_mulss(   *i0   ,cosT)>>15)-  (int)(__builtin_mulss((*iH-*iL),sinT)>>15);
     }
     else
     {
-        I2Tdata.IQMeasured = /* sqrt3/2 */  (int)((__builtin_mulss(*iH-*iL,cosT)+__builtin_mulss( *i0*3 ,sinT)+32768L)>>16);
-        I2Tdata.IDMeasured = /* 3/2 */      (int)((__builtin_mulss(  *i0  ,cosT)-__builtin_mulss(*iH-*iL,sinT)+32768L)>>16);
+        I2Tdata.IQMeasured = /* sqrt3/2 */  (int)((__builtin_mulss(*iH-*iL,cosT)+__builtin_mulss( *i0*3 ,sinT)+16384L)>>15);
+        I2Tdata.IDMeasured = /* 3/2 */      (int)((__builtin_mulss(  *i0  ,cosT)-__builtin_mulss(*iH-*iL,sinT)+16384L)>>15);
         
         //I2Tdata.IQMeasured = /* sqrt3/2 */  (int)(__builtin_mulss((*iH-*iL),cosT)>>15)+3*(int)(__builtin_mulss(   *i0   ,sinT)>>15);
         //I2Tdata.IDMeasured = /* 3/2 */      (int)(__builtin_mulss(   *i0   ,cosT)>>15)-  (int)(__builtin_mulss((*iH-*iL),sinT)>>15);
