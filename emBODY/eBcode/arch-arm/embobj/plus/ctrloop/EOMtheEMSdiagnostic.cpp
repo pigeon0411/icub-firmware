@@ -224,3 +224,11 @@ void EOMtheEMSDiagnostic::transmitTest()
 	
 	transmitUdpPackage();
 }
+extern "C"
+{
+	void initDiagnostic()
+	{
+		EOMtheEMSDiagnostic::Params param;
+		EOMtheEMSDiagnostic::instance().initialise(param);
+	}
+}
