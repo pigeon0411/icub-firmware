@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2013 iCub Facility - Istituto Italiano di Tecnologia
- * Author:  Marco Accame
- * email:   marco.accame@iit.it
- * website: www.robotcub.org
+ * Copyright (C) 2019 iCub Facility - Istituto Italiano di Tecnologia
+ * Author:  Luca Tricerri
+ * email:   luca.tricerri@iit.it
+ * website: https://github.com/icub-tech-iit
  * Permission is granted to copy, distribute, and/or modify this program
  * under the terms of the GNU General Public License, version 2 or any
  * later version published by the Free Software Foundation.
@@ -21,7 +21,7 @@
 // public interface
 
 #include "EOMtheEMSDiagnostic.h"
-
+#include "lock_guard"
 
 // --------------------------------------------------------------------------------------------------------------------
 // - external dependencies
@@ -71,6 +71,8 @@ bool EOMtheEMSDiagnostic::initialise(const Params& cfg)
         eo_errman_Error(eo_errman_GetHandle(), eo_errortype_fatal, "eom_emsdiscoverylistener_Initialise(): EOMtheIPnet not started yet", s_eobj_ownname, &eo_errman_DescrRuntimeErrorLocal);
     }
 
+     mutexBody_=eom_mutex_New();
+    
     // create the socket    
     socket_ = eo_socketdtg_New(cfg.inpdatagramnumber_, EOMDiagnosticUdpMsg::getSize(), (eobool_true == cfg.usemutex_) ? (eom_mutex_New()) : (NULL), 
                                                                cfg.outdatagramnumber_, EOMDiagnosticUdpMsg::getSize(), (eobool_true == cfg.usemutex_) ? (eom_mutex_New()) : (NULL)
@@ -185,7 +187,7 @@ bool EOMtheEMSDiagnostic::manageArrivedMessage(EOpacket* package)
                 break;                            
             default:
                 hal_trace_puts("ERROR - Unknown msg rx from pc104");
-                EOMDiagnosticRopMsg toSend(EOMDiagnosticRopMsg::Info{(uint16_t)DiagnosticRopCode::diag,(uint16_t)DiagnosticRopSeverity::error,5,5,5,5,5,5,5});                            
+                EOMDiagnosticRopMsg toSend(EOMDiagnosticRopMsg::Info{(uint16_t)DiagnosticRopCode::diag,(uint16_t)DiagnosticRopSeverity::error,(uint16_t)DiagnosticRopString::wrongcommand,5,5,5,5,5,5});                            
                 sendDiagnosticMessage(toSend,false);
                 break;            
         }
@@ -201,9 +203,11 @@ eOresult_t EOMtheEMSDiagnostic::transmitUdpPackage()
     
     //uint64_t start = osal_system_abstime_get();    
      
-    if(!txUdpMsg_.createUdpPacketData(udpMsgRaw_))
-        return eores_OK;//nothing to transmit
-
+    {
+        lock_guard<EOVmutexDerived> lock(mutexBody_);
+        if(!txUdpMsg_.createUdpPacketData(udpMsgRaw_))
+            return eores_OK;//nothing to transmit
+    }
     eo_packet_Full_LinkTo(txpkt_, remoteAddr_, remotePort_,EOMDiagnosticUdpMsg::getSize(), udpMsgRaw_.data());
 
     //uint64_t end = osal_system_abstime_get();    
@@ -225,8 +229,15 @@ eOresult_t EOMtheEMSDiagnostic::transmitUdpPackage()
     }
 
     res = eo_socketdtg_Put(socket_, txpkt_);
-
-    txUdpMsg_.reset();        
+    
+    eOresult_t tmp=res;
+    if(res!=eores_OK)
+        hal_trace_puts("ERROR - Udp msg not sent.");
+    else
+    {
+        lock_guard<EOVmutexDerived> lock(mutexBody_);
+        txUdpMsg_.reset();        
+    }
     return(res);
 }
 
@@ -253,8 +264,13 @@ eOresult_t EOMtheEMSDiagnostic::connect(eOipv4addr_t remaddr)
 }
 
 bool EOMtheEMSDiagnostic::sendDiagnosticMessage(EOMDiagnosticRopMsg& msg,bool flush)
-{       
-    bool out=txUdpMsg_.addRop(msg);
+{   
+    bool out;
+    {
+        lock_guard<EOVmutexDerived> lock(mutexBody_);
+        out=txUdpMsg_.addRop(msg);
+    }
+    
     if(flush || forceFlush_)
     {
         eom_task_SetEvent(task_, diagnosticEvent_evt_packet_tobesent); 
@@ -265,7 +281,11 @@ bool EOMtheEMSDiagnostic::sendDiagnosticMessage(EOMDiagnosticRopMsg& msg,bool fl
 
 bool EOMtheEMSDiagnostic::sendDiagnosticMessage(EOMDiagnosticRopMsg::Info& info,bool flush)
 {       
-    bool out=txUdpMsg_.addRop(info);
+    bool out;
+    {
+        lock_guard<EOVmutexDerived> lock(mutexBody_);
+        out=txUdpMsg_.addRop(info);
+    }
     if(flush || forceFlush_)
     {
         eom_task_SetEvent(task_, diagnosticEvent_evt_packet_tobesent); 
@@ -276,6 +296,7 @@ bool EOMtheEMSDiagnostic::sendDiagnosticMessage(EOMDiagnosticRopMsg::Info& info,
 
 EOMDiagnosticRopMsg& EOMtheEMSDiagnostic::getRopForModify(bool res)
 {
+    //Not to be used
     return txUdpMsg_.getRopForModify(res);
 }
 
